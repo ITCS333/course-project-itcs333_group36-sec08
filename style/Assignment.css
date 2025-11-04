@@ -1,0 +1,104 @@
+form {
+  width: 50%;
+  margin: 20px auto;
+  background-color: #fff;
+  border: 1px solid #ddd;
+  padding: 25px;
+  border-radius: 10px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+fieldset {
+  border: none;
+}
+
+legend {
+  font-size: 18px;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 10px;
+}
+
+label {
+  display: block;
+  font-weight: 500;
+  margin-top: 10px;
+}
+
+input[type="text"],
+input[type="date"],
+textarea {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  margin-top: 5px;
+  font-size: 14px;
+}
+
+button {
+  background-color: #333;
+  color: white;
+  border: none;
+  padding: 10px 18px;
+  border-radius: 6px;
+  margin-top: 15px;
+  display: block;
+  margin-left: auto;
+  cursor: pointer;
+  font-size: 15px;
+  transition: 0.3s;
+}
+
+
+table {
+  width: 90%;
+  margin: 30px auto;
+  border-collapse: collapse;
+  background-color: white;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+th {
+  background-color: #333;
+  color: white;
+  padding: 12px;
+  text-align: left;
+}
+
+td {
+  padding: 10px;
+  border-bottom: 1px solid #ddd;
+}
+
+tr:hover {
+  background-color: #f1f1f1;
+}
+
+a {
+  text-decoration: none;
+  color: #333;
+  margin-right: 10px;
+}
+
+a:hover {
+  color: #ff3333;
+  text-decoration: underline;
+}
+
+
+.header {
+  text-align: center;
+  margin-top: 4%;
+}
+
+
+
+.container {
+  width: 50%;
+  margin: 40px auto;
+  background-color: white;
+  padding: 30px;
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
