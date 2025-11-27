@@ -17,8 +17,10 @@ let assignments = [];
 
 // --- Element Selections ---
 // TODO: Select the assignment form ('#assignment-form').
+const assignmentForm = document.getElementById('assignment-form')
 
 // TODO: Select the assignments table body ('#assignments-tbody').
+const assignmentTbody = document.getElementById('assignment-tbody')
 
 // --- Functions ---
 
@@ -33,7 +35,31 @@ let assignments = [];
  * - A "Delete" button with class "delete-btn" and `data-id="${id}"`.
  */
 function createAssignmentRow(assignment) {
-  // ... your implementation here ...
+  const tr = document.createElement('tr');
+
+  const title = document.createElement('td');
+  title.textContent = assignment.title;
+  tr.appendChild(title);
+
+  const dueDate = document.createElement('td');
+  dueDate.textContent = assignment.dueDate;
+  tr.appendChild(dueDate);
+
+  const actions = document.createElement('button');
+  editButton.textContent = 'Edit';
+  editButton.className = 'edit-btn';
+  editButton.setAttribute('data-id', assignment.id);
+
+  const deleteButton = document.createElement('button');
+  deleteButton.textContent = 'Delete';
+  deleteButton.className = 'delete-btn';
+  deleteButton.setAttribute('data-id', assignment.id);
+
+  actions.appendChild(editButton);
+  actions.appendChild(deleteButton);
+  tr.appendChild(actions);
+
+  return tr;
 }
 
 /**
@@ -45,7 +71,14 @@ function createAssignmentRow(assignment) {
  * append the resulting <tr> to `assignmentsTableBody`.
  */
 function renderTable() {
-  // ... your implementation here ...
+
+  assignments.innerHTML = '';
+
+  assignments.forEach(assignment => {
+    const tr = createAssignmentRow(assignment);
+    assignment.appendChild(tr);
+  })
+
 }
 
 /**
@@ -60,7 +93,30 @@ function renderTable() {
  * 6. Reset the form.
  */
 function handleAddAssignment(event) {
-  // ... your implementation here ...
+  event.preventDefault();
+
+  const title = document.getElementById('assignment-title').value;
+  const description = document.getElementById('assignment-description').value;
+  const dueDate = document.getElementById('assignment-due-date').value;
+  const files = document.getElementById('assignment-files').value;
+
+  const newAssignment = {
+    id: `asg_${Date.now()}`,
+    title: title,
+    description: description,
+    dueDate: dueDate,
+    files: files
+  };
+
+  assignments.push(newAssignment);
+
+  renderTable();
+
+  assignmentForm.reset();
+
+  console.log('New assignment added:', newAssignment);
+
+
 }
 
 /**
@@ -74,7 +130,22 @@ function handleAddAssignment(event) {
  * 4. Call `renderTable()` to refresh the list.
  */
 function handleTableClick(event) {
-  // ... your implementation here ...
+  if (event.target.classList.contains('delete-btn')) {
+    const assignmentId = event.target.getAttribute('data-id');
+
+    // Filter out the assignment with the matching ID
+    assignments = assignments.filter(assignment => assignment.id !== assignmentId);
+
+    // Refresh the table
+    renderTable();
+
+    console.log('Assignment deleted:', assignmentId);
+  }
+  if (event.target.classList.contains('edit-btn')) {
+    const assignmentId = event.target.getAttribute('data-id');
+    console.log('Edit assignment:', assignmentId);
+  }
+
 }
 
 /**
@@ -88,7 +159,31 @@ function handleTableClick(event) {
  * 5. Add the 'click' event listener to `assignmentsTableBody` (calls `handleTableClick`).
  */
 async function loadAndInitialize() {
-  // ... your implementation here ...
+  try {
+    const response = await fetch('assignments.json');
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data = await response.json();
+
+    assignments = data.assignments || [];
+
+    renderTable();
+
+    assignmentForm.addEventListener('submit', handleAddAssignment);
+    assignmentTbody.addEventListener('click', handleTableClick);
+
+    console.log('Admin page initialized successfully');
+
+  } catch (error) {
+    console.error('Error loading assignments:', error);
+    const errorMessage = document.createElement('div');
+    errorMessage.style.color = 'red';
+    errorMessage.textContent = 'Failed to load assignments. Please refresh the page.';
+    document.querySelector('main').prepend(errorMessage);
+  }
 }
 
 // --- Initial Page Load ---

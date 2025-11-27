@@ -9,51 +9,72 @@
 <html lang="en">
 
 <head>
+     <!-- TODO: Add the 'meta' tag for character encoding (UTF-8). -->
      <meta charset="UTF-8">
+
+     <!-- TODO: Add the responsive 'viewport' meta tag. -->
      <meta name="viewport" content="width=device-width, initial-scale=1.0">
-     <title>HomePage</title>
 
+     <!-- TODO: Add a title, e.g., "Web Dev Course Homepage". -->
+     <title>Web Dev Course Homepage</title>
+     <!-- TODO: Link to your CSS framework or stylesheet. -->
      <link rel="stylesheet" href="style/index.css">
-
-
 
 </head>
 
 <body>
 
-     <header class="course-header">
-          <h1 class="header">Welcome To The Your Courses </h1>
+     <!-- TODO: Create a 'header' with a main heading ('h1') like "Welcome to the Web Development Course". -->
+     <header>
+          <h1>Welcome to the Web Development Course</h1>
      </header>
 
+     <!-- TODO: Create the 'main' content area. -->
      <main>
-          <br>
-          <h1 class="header">Site Navigation</h1>
 
-          <nav class="site-navigation">
-               <br>
+          <!-- TODO: Create a 'nav' element to hold the site navigation. -->
+          <nav>
+               <!-- TODO: Add a sub-heading ('h2') "Site Navigation". -->
+               <h2>Site Navigation</h2>
+               <!-- TODO: Create an unordered list ('ul') to hold the links. -->
                <ul>
-                    <li><a href="login.php">Login</a></li>
-               </ul>
-               <h2>Admin Pages</h2>
-               <ul>
-
-                    <li><a href="">Admin Portal (Manage Students)</a></li>
-                    <li><a href="">Admin: Manage Resources</a></li>
+                    <!-- Section: General -->
+                    <!-- TODO: Add a list item ('li') with a link ('a') to the Login page.
+                     - Text: "Login" -->
+                    <li><a href=""></a>Login</li>
+                    <!-- Section: Admin Pages -->
+                    <!-- TODO: Add a list item ('li') with a link ('a') to the Admin Portal.
+                     - Text: "Admin Portal (Manage Students)" -->
+                    <li><a href=""></a>Admin Portal (Manage Students)</li>
+                    <!-- TODO: Add a list item ('li') with a link ('a') to the Admin Resources page.
+                     - Text: "Admin: Manage Resources" -->
+                    <li><a href=""></a>Admin: Manage Resources</li>
+                    <!-- TODO: Add a list item ('li') with a link ('a') to the Admin Weekly Breakdown page.
+                     - Text: "Admin: Manage Weekly Breakdown" -->
                     <li><a href="">Admin: Manage Weekly Breakdown</a></li>
-                    <li><a href="Admin-Pages/Assignment.php">Admin: Manage Assignments</a></li>
-               </ul>
-               <h2>Student Pages</h2>
-               <ul>
-
-
-                    <li><a href="">View Course Resources</a></li>
-                    <li><a href="">View Weekly Breakdown</a></li>
-                    <li><a href="student-Pages/Assignment.php">View Assignments</a></li>
+                    <!-- TODO: Add a list item ('li') with a link ('a') to the Admin Assignments page.
+                     - Text: "Admin: Manage Assignments" -->
+                    <li><a href="src/assignments/admin.html"></a>Admin: Manage Assignments</li>
+                    <!-- Section: Student Pages -->
+                    <!-- TODO: Add a list item ('li') with a link ('a') to the Student Resources page.
+                     - Text: "View Course Resources" -->
+                    <li><a href=""></a>View Course Resources</li>
+                    <!-- TODO: Add a list item ('li') with a link ('a') to the Student Weekly Breakdown page.
+                     - Text: "View Weekly Breakdown" -->
+                    <li><a href=""></a>View Weekly Breakdown</li>
+                    <!-- TODO: Add a list item ('li') with a link ('a') to the Student Assignments page.
+                     - Text: "View Assignments" -->
+                    <li><a href="src/assignments/list.html"></a>View Assignments</li>
+                    <!-- TODO: Add a list item ('li') with a link ('a') to the Discussion Board.
+                     - Text: "General Discussion Board" -->
                     <li><a href="">General Discussion Board</a></li>
+                    <!-- End of the unordered list. -->
                </ul>
+               <!-- End of the 'nav' element. -->
           </nav>
-     </main>
 
+          <!-- End of 'main'. -->
+     </main>
 </body>
 
 </html>
