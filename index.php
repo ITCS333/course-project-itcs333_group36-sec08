@@ -54,7 +54,7 @@
                     <li><a href="">Admin: Manage Weekly Breakdown</a></li>
                     <!-- TODO: Add a list item ('li') with a link ('a') to the Admin Assignments page.
                      - Text: "Admin: Manage Assignments" -->
-                    <li><a href="src/assignments/admin.html"></a>Admin: Manage Assignments</li>
+                    <a href="assignments/admin.html"><li>Admin: Manage Assignments</li</a>
                     <!-- Section: Student Pages -->
                     <!-- TODO: Add a list item ('li') with a link ('a') to the Student Resources page.
                      - Text: "View Course Resources" -->
@@ -64,7 +64,7 @@
                     <li><a href=""></a>View Weekly Breakdown</li>
                     <!-- TODO: Add a list item ('li') with a link ('a') to the Student Assignments page.
                      - Text: "View Assignments" -->
-                    <li><a href="src/assignments/list.html"></a>View Assignments</li>
+                    <a href="assignments/list.html"><li>View Assignments</li></a>
                     <!-- TODO: Add a list item ('li') with a link ('a') to the Discussion Board.
                      - Text: "General Discussion Board" -->
                     <li><a href="">General Discussion Board</a></li>

@@ -44,7 +44,8 @@ const newCommentText = document.getElementById('new-comment-text');
  * 3. Return the id.
  */
 function getAssignmentIdFromURL() {
-  const query = new URLSearchParams(window.location.search);
+  const queryString = window.location.search;
+  const query = new URLSearchParams(queryString);
   return query.get("id");
 }
 
@@ -70,7 +71,7 @@ function renderAssignmentDetails(assignment) {
     link.href = "#";
     link.textContent = file;
     li.appendChild(link);
-    file.appendChild(li);
+    files.appendChild(li);
   })
 
 
@@ -87,10 +88,12 @@ function createCommentArticle(comment) {
 
   const textP = document.createElement('p')
   textP.textContent = comment.text;
-  article.appendChild(textP);
+
 
   const footer = document.createElement('footer');
   footer.textContent = comment.author
+
+  article.appendChild(textP);
   article.appendChild(footer);
 
   return article;
@@ -106,6 +109,7 @@ function createCommentArticle(comment) {
  * append the resulting <article> to `commentList`.
  */
 function renderComments() {
+  
   commentList.innerHTML = "";
 
   currentComments.forEach(comment => {
@@ -129,7 +133,8 @@ function renderComments() {
  */
 function handleAddComment(event) {
   event.preventDefault();
-  const commentText = newCommentText.ariaValueMax.trim();
+  
+  const commentText = newCommentText.value.trim();
 
   if (commentText === "") return;
 
@@ -171,8 +176,8 @@ async function initializePage() {
   }
 
   const [assignmentsResponse, commentsResponse] = await Promise.all([
-    fetch('assignments.json'),
-    fetch('comments.json')
+    fetch('api/assignments.json'),
+    fetch('api/comments.json')
   ]);
 
   const assignments = await assignmentsResponse.json();
@@ -183,11 +188,15 @@ async function initializePage() {
   currentComments = commentsData[currentAssignmentId] || [];
 
   if (assignment) {
-    renderAssignmentDetails(assignment);
-    renderComments();
+    assignmentTitle.textContent = "Error";
+    return;
 
-    commentForm.addEventListener('submit', handleAddComment);
-  } else {
+  }
+  renderAssignmentDetails(assignment);
+  renderComments();
+  commentForm.addEventListener('submit', handleAddComment);
+  
+  else {
     document.body.innerHTML = "<h2>Error: Assignment not found.</h2>";
   }
 

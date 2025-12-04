@@ -22,20 +22,21 @@
      </header>
 
     <main>
+        
         <article>
             <p id="assignment-due-date">Due: YYYY-MM-DD</p>
             <h2 >Description</h2>
             <p id="assignment-description">detailed description.....</p>
-            <h2 id="assignment-files-list">Attached Files & Links</h2>
-            <ul>
+            <h2>Attached Files & Links</h2>
+            <ul id="assignment-files-list">
                 <li><a href="#">assignment-brief.pdf</a></li>
             </ul>
         </article>
 
         <section id="discussion-forum">
             <h2>Questions & Discussion</h2>
-            <div class="comment-list">
-                <article class="comment">
+            <div id="comment-list">
+                <article>
                 <p>Is it okay to use a 'section' inside an 'article'?</p>
                 <footer>Posted by: Jane Smith</footer>
                 </article>
@@ -43,7 +44,6 @@
                 <form action="#" id="comment-form">
                     <fieldset>
                         <legend>Ask a Question</legend>
-
                         <label for="new-comment">Your Comment:</label>
                         <textarea id="new-comment-text" required></textarea>
 

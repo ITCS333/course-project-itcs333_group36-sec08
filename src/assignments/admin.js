@@ -20,7 +20,7 @@ let assignments = [];
 const assignmentForm = document.getElementById('assignment-form')
 
 // TODO: Select the assignments table body ('#assignments-tbody').
-const assignmentTbody = document.getElementById('assignment-tbody')
+const assignmentsTableBody = document.getElementById('assignments-tbody')
 
 // --- Functions ---
 
@@ -35,29 +35,34 @@ const assignmentTbody = document.getElementById('assignment-tbody')
  * - A "Delete" button with class "delete-btn" and `data-id="${id}"`.
  */
 function createAssignmentRow(assignment) {
+  const { id, title, dueDate } = assignment;
+
   const tr = document.createElement('tr');
 
-  const title = document.createElement('td');
-  title.textContent = assignment.title;
-  tr.appendChild(title);
+  const titleTd = document.createElement('td');
+  titleTd.textContent = title;
 
-  const dueDate = document.createElement('td');
-  dueDate.textContent = assignment.dueDate;
-  tr.appendChild(dueDate);
+  const dateTd = document.createElement('td');
+  dateTd.textContent = dueDate;
 
-  const actions = document.createElement('button');
-  editButton.textContent = 'Edit';
-  editButton.className = 'edit-btn';
-  editButton.setAttribute('data-id', assignment.id);
+  const actionsTd = document.createElement('td');
 
-  const deleteButton = document.createElement('button');
-  deleteButton.textContent = 'Delete';
-  deleteButton.className = 'delete-btn';
-  deleteButton.setAttribute('data-id', assignment.id);
+  const editBtn = document.createElement('button');
+  editBtn.textContent = 'Edit';
+  editBtn.classList.add('edit-btn');
+  editBtn.dataset.id = id; 
+  
+  const deleteBtn = document.createElement('button');
+  deleteBtn.textContent = 'Delete';
+  deleteBtn.classList.add('delete-btn');
+  deleteBtn.dataset.id = id;
 
-  actions.appendChild(editButton);
-  actions.appendChild(deleteButton);
-  tr.appendChild(actions);
+  actionsTd.appendChild(editBtn);
+  actionsTd.appendChild(deleteBtn);
+
+  tr.appendChild(titleTd);
+  tr.appendChild(dateTd);
+  tr.appendChild(actionsTd);
 
   return tr;
 }
@@ -71,14 +76,12 @@ function createAssignmentRow(assignment) {
  * append the resulting <tr> to `assignmentsTableBody`.
  */
 function renderTable() {
-
-  assignments.innerHTML = '';
+        assignmentsTableBody.innerHTML = '';
 
   assignments.forEach(assignment => {
     const tr = createAssignmentRow(assignment);
-    assignment.appendChild(tr);
-  })
-
+          assignmentsTableBody.appendChild(tr);
+  });
 }
 
 /**
@@ -93,6 +96,7 @@ function renderTable() {
  * 6. Reset the form.
  */
 function handleAddAssignment(event) {
+  
   event.preventDefault();
 
   const title = document.getElementById('assignment-title').value;
@@ -139,13 +143,7 @@ function handleTableClick(event) {
     // Refresh the table
     renderTable();
 
-    console.log('Assignment deleted:', assignmentId);
   }
-  if (event.target.classList.contains('edit-btn')) {
-    const assignmentId = event.target.getAttribute('data-id');
-    console.log('Edit assignment:', assignmentId);
-  }
-
 }
 
 /**
@@ -160,20 +158,21 @@ function handleTableClick(event) {
  */
 async function loadAndInitialize() {
   try {
-    const response = await fetch('assignments.json');
+    const response = await fetch('api/assignments.json');
 
     if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+      throw new Error("error loading assignments");
     }
 
     const data = await response.json();
 
-    assignments = data.assignments || [];
-
+    assignments.push(...data);
+    
     renderTable();
 
     assignmentForm.addEventListener('submit', handleAddAssignment);
-    assignmentTbody.addEventListener('click', handleTableClick);
+    assignmentsTableBody.addEventListener('click',handleTableClick);
+
 
     console.log('Admin page initialized successfully');
 
