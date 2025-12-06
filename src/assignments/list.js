@@ -27,7 +27,6 @@ const assignmentList = document.getElementById('assignment-list-section');
 function createAssignmentArticle(assignment) {
 
   const article = document.createElement('article');
-  article.className = 'assignment-item';
 
   const title = document.createElement('h2');
   title.textContent = assignment.title;
@@ -42,7 +41,8 @@ function createAssignmentArticle(assignment) {
   article.appendChild(description)
 
   const detailLink = document.createElement('a');
-  detailLink.href = `details.html?id=${assignment.id}`; detailLink.textContent = 'View Details & Discussion';
+  detailLink.href = `details.html?id=${assignment.id}`;
+  detailLink.textContent = 'View Details & Discussion';
   article.appendChild(detailLink);
 
   return article;
@@ -60,14 +60,14 @@ function createAssignmentArticle(assignment) {
  * - Append the returned <article> element to `listSection`.
  */
 async function loadAssignments() {
-  const response = await fetch('assignments.json');
+  const response = await fetch('api/assignments.json');
   const assignments = await response.json();
 
-  listSection.innerHTML = "";
+  assignmentList.innerHTML = "";
 
   assignments.forEach(assignment => {
     const article = createAssignmentArticle(assignment);
-    listSection.appendChild(article);
+    assignmentList.appendChild(article);
   });
 
 }

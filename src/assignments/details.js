@@ -44,8 +44,8 @@ const newCommentText = document.getElementById('new-comment-text');
  * 3. Return the id.
  */
 function getAssignmentIdFromURL() {
-  const queryString = window.location.search;
-  const query = new URLSearchParams(queryString);
+  let queryString = window.location.search;
+  let query = new URLSearchParams(queryString);
   return query.get("id");
 }
 
@@ -65,11 +65,12 @@ function renderAssignmentDetails(assignment) {
   description.textContent = assignment.description;
 
   files.innerHTML = "";
-  files.forEach(file => {
+
+  assignment.files.forEach(file => {
     const li = document.createElement("li");
     const link = document.createElement("a");
-    link.href = "#";
-    link.textContent = file;
+    link.href = file.url;
+    link.textContent = file.name;
     li.appendChild(link);
     files.appendChild(li);
   })
@@ -109,7 +110,7 @@ function createCommentArticle(comment) {
  * append the resulting <article> to `commentList`.
  */
 function renderComments() {
-  
+
   commentList.innerHTML = "";
 
   currentComments.forEach(comment => {
@@ -119,6 +120,7 @@ function renderComments() {
 }
 
 /**
+ *
  * TODO: Implement the handleAddComment function.
  * This is the event handler for the `commentForm` 'submit' event.
  * It should:
@@ -133,8 +135,8 @@ function renderComments() {
  */
 function handleAddComment(event) {
   event.preventDefault();
-  
-  const commentText = newCommentText.value.trim();
+
+  let commentText = newCommentText.value;
 
   if (commentText === "") return;
 
@@ -171,7 +173,7 @@ async function initializePage() {
   currentAssignmentId = getAssignmentIdFromURL();
 
   if (!currentAssignmentId) {
-    displayError("No assignment ID found in URL. Please check the link and try again.");
+    document.body.innerHTML = '<h2>Error: No assignment ID found in URL</h2>';
     return;
   }
 
@@ -188,14 +190,12 @@ async function initializePage() {
   currentComments = commentsData[currentAssignmentId] || [];
 
   if (assignment) {
-    assignmentTitle.textContent = "Error";
-    return;
-
+    renderAssignmentDetails(assignment);
+    renderComments();
+    commentForm.addEventListener('submit', handleAddComment);
   }
-  renderAssignmentDetails(assignment);
-  renderComments();
-  commentForm.addEventListener('submit', handleAddComment);
-  
+
+
   else {
     document.body.innerHTML = "<h2>Error: Assignment not found.</h2>";
   }
