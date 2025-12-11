@@ -44,7 +44,8 @@ const newCommentText = document.getElementById('new-comment-text');
  * 3. Return the id.
  */
 function getAssignmentIdFromURL() {
-  const query = new URLSearchParams(window.location.search);
+  let queryString = window.location.search;
+  let query = new URLSearchParams(queryString);
   return query.get("id");
 }
 
@@ -64,13 +65,14 @@ function renderAssignmentDetails(assignment) {
   description.textContent = assignment.description;
 
   files.innerHTML = "";
-  files.forEach(file => {
+
+  assignment.files.forEach(file => {
     const li = document.createElement("li");
     const link = document.createElement("a");
-    link.href = "#";
-    link.textContent = file;
+    link.href = file.url;
+    link.textContent = file.name;
     li.appendChild(link);
-    file.appendChild(li);
+    files.appendChild(li);
   })
 
 
@@ -87,10 +89,12 @@ function createCommentArticle(comment) {
 
   const textP = document.createElement('p')
   textP.textContent = comment.text;
-  article.appendChild(textP);
+
 
   const footer = document.createElement('footer');
   footer.textContent = comment.author
+
+  article.appendChild(textP);
   article.appendChild(footer);
 
   return article;
@@ -106,6 +110,7 @@ function createCommentArticle(comment) {
  * append the resulting <article> to `commentList`.
  */
 function renderComments() {
+
   commentList.innerHTML = "";
 
   currentComments.forEach(comment => {
@@ -115,6 +120,7 @@ function renderComments() {
 }
 
 /**
+ *
  * TODO: Implement the handleAddComment function.
  * This is the event handler for the `commentForm` 'submit' event.
  * It should:
@@ -129,7 +135,8 @@ function renderComments() {
  */
 function handleAddComment(event) {
   event.preventDefault();
-  const commentText = newCommentText.ariaValueMax.trim();
+
+  let commentText = newCommentText.value;
 
   if (commentText === "") return;
 
@@ -166,13 +173,13 @@ async function initializePage() {
   currentAssignmentId = getAssignmentIdFromURL();
 
   if (!currentAssignmentId) {
-    displayError("No assignment ID found in URL. Please check the link and try again.");
+    document.body.innerHTML = '<h2>Error: No assignment ID found in URL</h2>';
     return;
   }
 
   const [assignmentsResponse, commentsResponse] = await Promise.all([
-    fetch('assignments.json'),
-    fetch('comments.json')
+    fetch('api/assignments.json'),
+    fetch('api/comments.json')
   ]);
 
   const assignments = await assignmentsResponse.json();
@@ -185,9 +192,11 @@ async function initializePage() {
   if (assignment) {
     renderAssignmentDetails(assignment);
     renderComments();
-
     commentForm.addEventListener('submit', handleAddComment);
-  } else {
+  }
+
+
+  else {
     document.body.innerHTML = "<h2>Error: Assignment not found.</h2>";
   }
 
