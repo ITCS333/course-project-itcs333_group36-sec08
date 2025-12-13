@@ -16,6 +16,8 @@
 
   3. Implement the TODOs below.
 */
+const API_URL = "api/index.php";
+
 
 // --- Global Data Store ---
 // These will hold the data related to *this* specific week.
@@ -24,6 +26,16 @@ let currentComments = [];
 
 // --- Element Selections ---
 // TODO: Select all the elements you added IDs for in step 2.
+
+const weekTitle = document.querySelector("#week-title");
+const weekStartDate = document.querySelector("#week-start-date");
+const weekDescription = document.querySelector("#week-description");
+const weekLinksList = document.querySelector("#week-links-list");
+const commentList = document.querySelector("#comment-list");
+const commentForm = document.querySelector("#comment-form");
+const newCommentText = document.querySelector("#new-comment-text");
+
+
 
 // --- Functions ---
 
@@ -35,7 +47,8 @@ let currentComments = [];
  * 3. Return the id.
  */
 function getWeekIdFromURL() {
-  // ... your implementation here ...
+  const params = new URLSearchParams(window.location.search);
+  return params.get("id");
 }
 
 /**
@@ -49,9 +62,35 @@ function getWeekIdFromURL() {
  * for each link in the week's 'links' array. The link's `href` and `textContent`
  * should both be the link URL.
  */
+
 function renderWeekDetails(week) {
-  // ... your implementation here ...
+  weekTitle.textContent = week.title;
+  weekStartDate.textContent = `Starts on: ${week.start_date}`;
+  weekDescription.textContent = week.description || "No description for this week.";
+
+  weekLinksList.innerHTML = "";
+
+  const links = Array.isArray(week.links) ? week.links : [];
+  if (!links.length) {
+    const li = document.createElement("li");
+    li.className = "text-muted";
+    li.textContent = "No extra links were provided for this week.";
+    weekLinksList.appendChild(li);
+    return;
+  }
+
+  links.forEach((url) => {
+    const li = document.createElement("li");
+    const a = document.createElement("a");
+    a.href = url;
+    a.textContent = url;
+    a.target = "_blank";
+    a.rel = "noopener noreferrer";
+    li.appendChild(a);
+    weekLinksList.appendChild(li);
+  });
 }
+
 
 /**
  * TODO: Implement the createCommentArticle function.
@@ -60,7 +99,17 @@ function renderWeekDetails(week) {
  * (e.g., an <article> containing a <p> and a <footer>).
  */
 function createCommentArticle(comment) {
-  // ... your implementation here ...
+  const article = document.createElement("article");
+
+  const p = document.createElement("p");
+  p.textContent = comment.text;
+
+  const footer = document.createElement("footer");
+  footer.className = "text-muted";
+  footer.textContent = `Posted by: ${comment.author}`;
+
+  article.append(p, footer);
+  return article;
 }
 
 /**
@@ -72,9 +121,69 @@ function createCommentArticle(comment) {
  * append the resulting <article> to `commentList`.
  */
 function renderComments() {
-  // ... your implementation here ...
+  commentList.innerHTML = "";
+
+  if (!currentComments.length) {
+    const p = document.createElement("p");
+    p.className = "text-muted";
+    p.textContent = "No comments yet. Be the first to ask a question.";
+    commentList.appendChild(p);
+    return;
+  }
+
+  currentComments.forEach((c) => {
+    commentList.appendChild(createCommentArticle(c));
+  });
 }
 
+async function loadWeekAndComments() {
+  currentWeekId = getWeekIdFromURL();
+
+  if (!currentWeekId) {
+    weekTitle.textContent = "Week not found.";
+    weekDescription.textContent = "No week id was provided in the URL.";
+    return;
+  }
+
+  try {
+    const [weekRes, commentsRes] = await Promise.all([
+      fetch(
+        `${API_URL}?resource=weeks&id=${encodeURIComponent(currentWeekId)}`
+      ),
+      fetch(
+        `${API_URL}?resource=comments&week_id=${encodeURIComponent(
+          currentWeekId
+        )}`
+      ),
+    ]);
+
+    const weekJson = await weekRes.json();
+    const commentsJson = await commentsRes.json();
+
+    if (!weekJson.success || !weekJson.data) {
+      weekTitle.textContent = "Week not found.";
+      weekDescription.textContent =
+        weekJson.error || "The requested week could not be found.";
+      return;
+    }
+
+    const week = weekJson.data;
+    currentComments =
+      commentsJson.success && Array.isArray(commentsJson.data)
+        ? commentsJson.data
+        : [];
+
+    renderWeekDetails(week);
+    renderComments();
+  } catch (err) {
+    console.error("Error loading week details:", err);
+    weekTitle.textContent = "Error loading week details.";
+    weekDescription.textContent =
+      "An error occurred while contacting the server.";
+    commentList.innerHTML =
+      '<p class="text-muted">Unable to load comments.</p>';
+  }
+}
 /**
  * TODO: Implement the handleAddComment function.
  * This is the event handler for the `commentForm` 'submit' event.
@@ -88,8 +197,48 @@ function renderComments() {
  * 6. Call `renderComments()` to refresh the list.
  * 7. Clear the `newCommentText` textarea.
  */
-function handleAddComment(event) {
-  // ... your implementation here ...
+async function handleAddComment(event) {
+  event.preventDefault();
+
+  const text = newCommentText.value.trim();
+  if (!text || !currentWeekId) return;
+
+  try {
+    const res = await fetch(`${API_URL}?resource=comments`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        week_id: currentWeekId,
+        author: "Student",
+        text,
+      }),
+    });
+
+    const json = await res.json();
+
+    if (!json.success) {
+      alert(json.error || "Failed to add comment.");
+      return;
+    }
+
+    // API returns the saved comment in json.data
+    const saved = json.data || {
+      author: "Student",
+      text,
+    };
+
+    currentComments.push({
+      author: saved.author,
+      text: saved.text,
+      created_at: saved.created_at,
+    });
+
+    renderComments();
+    newCommentText.value = "";
+  } catch (err) {
+    console.error("Error creating comment:", err);
+    alert("Failed to create comment. Please try again.");
+  }
 }
 
 /**
@@ -109,9 +258,13 @@ function handleAddComment(event) {
  * - Add the 'submit' event listener to `commentForm` (calls `handleAddComment`).
  * 8. If the week is not found, display an error in `weekTitle`.
  */
-async function initializePage() {
+ 
+  
+ async function initializePage() {
   // ... your implementation here ...
+  await loadWeekAndComments();
+  commentForm.addEventListener("submit", handleAddComment);
 }
-
+   
 // --- Initial Page Load ---
 initializePage();
