@@ -41,7 +41,7 @@
 // ============================================================================
 
 // TODO: Set Content-Type header to application/json
-header("content-Type:application/json; charset=utf-8");
+header("content-Type:application/json");
 
 // TODO: Set CORS headers to allow cross-origin requests
 header("Access-control-Allow-Origin:*");
@@ -49,7 +49,7 @@ header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS");
 header("Access-Control-Allow-Headers: Content-Type");
 
 // TODO: Handle preflight OPTIONS request
-if ($_SERVER['REQUEST_METHOD'] === 'OPTION') {
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     http_response_code(200);
     exit;
 }
@@ -60,20 +60,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTION') {
 
 // TODO: Include the database connection class
 $host = "localhost";
-$dbname = "project-db";
-$user = "root";
-$password = "";
+$dbname = "course";
+$user = "admin";
+$password = "password123";
 
 // TODO: Create database connection
 // TODO: Set PDO to throw exceptions on errors
+$dsn = "mysql:host=$host;dbname=$dbname;charset=utf8";
+
 try {
-    $db = new PDO("mysql:host=$host;dbname=$dbname;charset=utf8", $user, $password);
-    $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-} catch (PDOException $e) {
-    sendResponse([
-        "success" => false,
-        "message" => "Database connection failed"
-    ], 500);
+    $pdo = new PDO($dsn, $user, $password);
+    echo "Connected successfully";
+} catch (\PDOException $e) {
+    throw new \PDOException($e->getMessage(), (int)$e->getCode());
 }
 
 
@@ -89,17 +88,10 @@ $method = $_SERVER["REQUEST_METHOD"];
 
 
 // TODO: Get the request body for POST and PUT requests
-$input = file_get_contents("php://input");
-$data = null;
-if ($method === 'POST' && $method === 'PUT') {
-    if (!empty($input)) {
-        $data = json_decode($input, true);
-    }
-}
+$bodyData = json_decode(file_get_contents('php://input'), true);
 
 // TODO: Parse query parameters
 $resource = isset($_GET['resource']) ? $_GET['resource'] : null;
-
 
 // ============================================================================
 // ASSIGNMENT CRUD FUNCTIONS

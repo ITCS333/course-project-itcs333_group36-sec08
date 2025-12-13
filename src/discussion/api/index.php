@@ -45,33 +45,52 @@
 
 // TODO: Set headers for JSON response and CORS
 // Set Content-Type to application/json
+header('Content-Type: application/json');
 // Allow cross-origin requests (CORS) if needed
+header('Access-Control-Allow-Origin: *');
 // Allow specific HTTP methods (GET, POST, PUT, DELETE, OPTIONS)
+header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');
 // Allow specific headers (Content-Type, Authorization)
+header('Access-Control-Allow-Headers: Content-Type, Authorization');
 
 
 // TODO: Handle preflight OPTIONS request
 // If the request method is OPTIONS, return 200 status and exit
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    http_response_code(200);
+    exit();
+}
 
 
 // TODO: Include the database connection class
 // Assume the Database class has a method getConnection() that returns a PDO instance
+require_once '../../config/Database.php';
+$database = new Database();
+
 
 
 // TODO: Get the PDO database connection
-// $db = $database->getConnection();
+$db = $database-> getConnection();
+
 
 
 // TODO: Get the HTTP request method
 // Use $_SERVER['REQUEST_METHOD']
+$method = $_SERVER['REQUEST_METHOD'];
 
 
 // TODO: Get the request body for POST and PUT requests
+$input = file_get_contents('php://input');
+$data = json_decode($input, true);
+
 // Use file_get_contents('php://input') to get raw POST data
 // Decode JSON data using json_decode()
 
 
 // TODO: Parse query parameters for filtering and searching
+$resource = isset($_GET['resource']) ? $_GET['resource'] : null;
+$topicId = isset($_GET['id']) ? $_GET['id'] : null;
+$replyId = isset($_GET['id']) ? $_GET['id'] : null;
 
 
 // ============================================================================
