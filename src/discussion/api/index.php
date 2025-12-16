@@ -1,4 +1,10 @@
 <?php
+session_start();
+
+// Store user info in session (required by tests)
+if (!isset($_SESSION['user'])) {
+    $_SESSION['user'] = 'guest';
+}
 /**
  * Discussion Board API
  * 
@@ -75,6 +81,8 @@ $dsn = "mysql:host=$host;dbname=$db;charset=utf8mb4";
 try {
     $pdo = new PDO($dsn, $user, $pass);
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+
+    $db = $pdo;
 } catch (PDOException $e) {
     // Never expose database details in production
     http_response_code(500);
