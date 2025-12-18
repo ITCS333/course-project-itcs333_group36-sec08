@@ -498,6 +498,7 @@ function createComment($db, $data) {
     // TODO: Sanitize input data
     // Trim whitespace from author and text
     $author = trim($data['author']);
+    $_SESSION['last_comment_author'] = $author;
     $text = trim($data['text']);
     // TODO: Prepare INSERT query
     // INSERT INTO comments (resource_id, author, text) VALUES (?, ?, ?)
