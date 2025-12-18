@@ -17,6 +17,8 @@
 */
 
 // --- Global Data Store ---
+const API_URL = '/api/discussion.php';
+
 let currentTopicId = null;
 let currentReplies = []; // Will hold replies for *this* topic
 
@@ -120,19 +122,35 @@ currentReplies.forEach(reply => {
  * 6. Call `renderReplies()` to refresh the list.
  * 7. Clear the `newReplyText` textarea.
  */
-function handleAddReply(event) {
-event.preventDefault();
-const replyText = newReplyText.value.trim();
-if (replyText === '') return;
-const newReply = {
-  id: `reply_${Date.now()}`,
- author: 'Student' (hardcoded),
- date: new Date().toISOString().split('T')[0],
- text: replyText
- }
-currentReplies.push(newReply);
-renderReplies();
-newReplyText.value = '';
+async function handleAddReply(event) {
+  event.preventDefault();
+
+  const text = newReplyText.value.trim();
+  if (!text) return;
+
+  const reply = {
+    reply_id: `reply_${Date.now()}`,
+    id: currentTopicId,
+    text,
+    author: 'Student'
+  };
+
+  const response = await fetch(`${API_URL}?resource=replies`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(reply)
+  });
+
+  const result = await response.json();
+  if (!result.success) return alert(result.message);
+
+  currentReplies.push({
+    ...reply,
+    date: new Date().toISOString().split('T')[0]
+  });
+
+  renderReplies();
+  newReplyText.value = '';
 }
 
 /**
@@ -145,13 +163,23 @@ newReplyText.value = '';
  * with the matching ID (in-memory only).
  * 4. Call `renderReplies()` to refresh the list.
  */
-function handleReplyListClick(event) {
-if(event.target.classList.contains('delete-reply-btn')){
-  const replyId = event.target.getAttribute('data-id');
-  currentReplies = currentReplies.filter( reply => reply.id !== replyId);
+async function handleReplyListClick(event) {
+  if (!event.target.classList.contains('delete-reply-btn')) return;
+
+  const replyId = event.target.dataset.id;
+
+  const response = await fetch(
+    `${API_URL}?resource=replies&id=${replyId}`,
+    { method: 'DELETE' }
+  );
+
+  const result = await response.json();
+  if (!result.success) return alert(result.message);
+
+  currentReplies = currentReplies.filter(r => r.id !== replyId);
   renderReplies();
 }
-}
+
 
 /**
  * TODO: Implement an `initializePage` function.
@@ -172,41 +200,39 @@ if(event.target.classList.contains('delete-reply-btn')){
  * 8. If the topic is not found, display an error in `topicSubject`.
  */
 async function initializePage() {
-currentTopicId = getTopicIdFromURL();
+  currentTopicId = getTopicIdFromURL();
+  if (!currentTopicId) {
+    topicSubject.textContent = 'Topic not found';
+    return;
+  }
 
-if(!currentTopicId){
-  topicSubject.textContent = "Topic not found. ";
-  return;
-}
-
- try {
-    // Step 3: Fetch both JSON files using Promise.all
-    const [topicsResponse, repliesResponse] = await Promise.all([
-      fetch('topics.json'),
-      fetch('replies.json')
+  try {
+    const [topicRes, repliesRes] = await Promise.all([
+      fetch(`${API_URL}?resource=topics&id=${currentTopicId}`),
+      fetch(`${API_URL}?resource=replies&id=${currentTopicId}`)
     ]);
 
-    const topics = await topicsResponse.json();
-    const repliesData = await repliesResponse.json();
-    
-const currentTopic = topics.find(topic => topic.id === currentTopicId);
+    const topicData = await topicRes.json();
+    const repliesData = await repliesRes.json();
 
-    currentReplies = repliesData[currentTopicId] || [];
-
-    if (currentTopic){
-      renderOriginalPost(currentTopic)
-      renderReplies();
-      replyForm.addEventListener('submit', handleAddReply);
-      replyListContainer.addEventListener('click', handleReplyListClick);
-    }else{
-      topicSubject.textContent = "Topic not found.";
+    if (!topicData.success) {
+      topicSubject.textContent = 'Topic not found';
+      return;
     }
-    }catch (error) {
-    // Handle any errors that occur during fetching or processing
-    console.error('Error initializing page:', error);
-    topicSubject.textContent = "Error loading topic. Please try again later.";
+
+    renderOriginalPost(topicData.data);
+    currentReplies = repliesData.data || [];
+    renderReplies();
+
+    replyForm.addEventListener('submit', handleAddReply);
+    replyListContainer.addEventListener('click', handleReplyListClick);
+
+  } catch (error) {
+    console.error(error);
+    topicSubject.textContent = 'Error loading topic';
   }
 }
+
 
 // --- Initial Page Load ---
 initializePage();
