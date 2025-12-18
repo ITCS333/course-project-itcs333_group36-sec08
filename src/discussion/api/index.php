@@ -17,7 +17,7 @@ if (!isset($_SESSION['user'])) {
  * Table: topics
  * Columns:
  *   - id (INT, PRIMARY KEY, AUTO_INCREMENT)
- *   - topic_id (VARCHAR(50), UNIQUE) - The topic's unique identifier (e.g., "topic_1234567890")
+ *   - id (VARCHAR(50), UNIQUE) - The topic's unique identifier (e.g., "topic_1234567890")
  *   - subject (VARCHAR(255)) - The topic subject/title
  *   - message (TEXT) - The main topic message
  *   - author (VARCHAR(100)) - The author's name
@@ -27,7 +27,7 @@ if (!isset($_SESSION['user'])) {
  * Columns:
  *   - id (INT, PRIMARY KEY, AUTO_INCREMENT)
  *   - reply_id (VARCHAR(50), UNIQUE) - The reply's unique identifier (e.g., "reply_1234567890")
- *   - topic_id (VARCHAR(50)) - Foreign key to topics.topic_id
+ *   - id (VARCHAR(50)) - Foreign key to topics.id
  *   - text (TEXT) - The reply message
  *   - author (VARCHAR(100)) - The reply author's name
  *   - created_at (TIMESTAMP) - When the reply was created
@@ -42,7 +42,7 @@ if (!isset($_SESSION['user'])) {
  *   DELETE /api/discussion.php?resource=topics&id={id}      - Delete a topic
  * 
  * Replies:
- *   GET    /api/discussion.php?resource=replies&topic_id={id} - Get all replies for a topic
+ *   GET    /api/discussion.php?resource=replies&id={id} - Get all replies for a topic
  *   POST   /api/discussion.php?resource=replies              - Create new reply
  *   DELETE /api/discussion.php?resource=replies&id={id}      - Delete a reply
  * 
@@ -138,8 +138,8 @@ $replyId = isset($_GET['id']) ? $_GET['id'] : null;
 function getAllTopics($db) {
     // TODO: Initialize base SQL query
     
-    // Select topic_id, subject, message, author, and created_at (formatted as date)
-    $sql = "SELECT topic_id, subject, message, author, DATE_FORMAT(created_at, '%Y-%m-%d %H:%i:%s') AS created_at FROM topics";
+    // Select id, subject, message, author, and created_at (formatted as date)
+    $sql = "SELECT id, subject, message, author, DATE_FORMAT(created_at, '%Y-%m-%d %H:%i:%s') AS created_at FROM topics";
     // TODO: Initialize an array to hold bound parameters
     $params = [];
     // TODO: Check if search parameter exists in $_GET
@@ -199,7 +199,7 @@ function getAllTopics($db) {
 
 
 /**
- * Function: Get a single topic by topic_id
+ * Function: Get a single topic by id
  * Method: GET
  * 
  * Query Parameters:
@@ -215,13 +215,13 @@ function getTopicById($db, $topicId) {
       ], 400);
     }
     
-    // TODO: Prepare SQL query to select topic by topic_id
-    // Select topic_id, subject, message, author, and created_at
-    $sql = "SELECT topic_id, subject, message, author, DATE_FORMAT(created_at, '%Y-%m-%d %H:%i:%s') AS created_at FROM topics WHERE topic_id = :topic_id";
+    // TODO: Prepare SQL query to select topic by id
+    // Select id, subject, message, author, and created_at
+    $sql = "SELECT id, subject, message, author, DATE_FORMAT(created_at, '%Y-%m-%d %H:%i:%s') AS created_at FROM topics WHERE id = :id";
     
-    // TODO: Prepare and bind the topic_id parameter
+    // TODO: Prepare and bind the id parameter
     $stmt = $db->prepare($sql);
-    $stmt->bindValue(':topic_id', $topicId);
+    $stmt->bindValue(':id', $topicId);
     // TODO: Execute the query
     $stmt->execute();
     // TODO: Fetch the result
@@ -248,16 +248,16 @@ function getTopicById($db, $topicId) {
  * Method: POST
  * 
  * Required JSON Body:
- *   - topic_id: Unique identifier (e.g., "topic_1234567890")
+ *   - id: Unique identifier (e.g., "topic_1234567890")
  *   - subject: Topic subject/title
  *   - message: Main topic message
  *   - author: Author's name
  */
 function createTopic($db, $data) {
     // TODO: Validate required fields
-    // Check if topic_id, subject, message, and author are provided
+    // Check if id, subject, message, and author are provided
     // If any required field is missing, return error with 400 status
-    if (empty($data['topic_id']) || empty($data['subject']) || empty($data['message']) || empty($data['author'])) {
+    if (empty($data['id']) || empty($data['subject']) || empty($data['message']) || empty($data['author'])) {
         sendResponse([
             'success' => false,
             'message' => 'Missing required fields'
@@ -267,18 +267,18 @@ function createTopic($db, $data) {
     // TODO: Sanitize input data
     // Trim whitespace from all string fields
     // Use the sanitizeInput() helper function
-    $topicId = sanitizeInput($data['topic_id']);
+    $topicId = sanitizeInput($data['id']);
     $subject = sanitizeInput($data['subject']);
     $message = sanitizeInput($data['message']);
     $author = sanitizeInput($data['author']);
     
-    // TODO: Check if topic_id already exists
+    // TODO: Check if id already exists
     // Prepare and execute a SELECT query to check for duplicate
     // If duplicate found, return error with 409 status (Conflict)
-    $checkSql = "SELECT COUNT(*) FROM topics WHERE topic_id = :topic_id";
+    $checkSql = "SELECT COUNT(*) FROM topics WHERE id = :id";
     $checkStmt = $db->prepare($checkSql);
     if ($checkStmt) {
-        $checkStmt->bindValue(':topic_id', $topicId);
+        $checkStmt->bindValue(':id', $topicId);
         $checkStmt->execute();
         $count = $checkStmt->fetchColumn();
         if ($count > 0) {
@@ -295,15 +295,15 @@ function createTopic($db, $data) {
     }
     
     // TODO: Prepare INSERT query
-    // Insert topic_id, subject, message, and author
-    $insertSql = "INSERT INTO topics (topic_id, subject, message, author) VALUES (:topic_id, :subject, :message, :author)";
+    // Insert id, subject, message, and author
+    $insertSql = "INSERT INTO topics (id, subject, message, author) VALUES (:id, :subject, :message, :author)";
     // The created_at field should auto-populate with CURRENT_TIMESTAMP
 
     
     // TODO: Prepare the statement and bind parameters
          $insertStmt = $db->prepare($insertSql);
     // Bind all the sanitized values
-    $insertStmt->bindValue(':topic_id', $topicId);
+    $insertStmt->bindValue(':id', $topicId);
     $insertStmt->bindValue(':subject', $subject);
     $insertStmt->bindValue(':message', $message);
     $insertStmt->bindValue(':author', $author);
@@ -314,13 +314,13 @@ function createTopic($db, $data) {
     
     // TODO: Check if insert was successful
     // If yes, return success response with 201 status (Created)
-    // Include the topic_id in the response
+    // Include the id in the response
     // If no, return error with 500 status
     if ($insertResult) {
         sendResponse([
             'success' => true,
             'message' => 'Topic created successfully',
-            'topic_id' => $topicId
+            'id' => $topicId
         ], 201);
     } else {
         sendResponse([
@@ -336,14 +336,14 @@ function createTopic($db, $data) {
  * Method: PUT
  * 
  * Required JSON Body:
- *   - topic_id: The topic's unique identifier
+ *   - id: The topic's unique identifier
  *   - subject: Updated subject (optional)
  *   - message: Updated message (optional)
  */
 function updateTopic($db, $data) {
-    // TODO: Validate that topic_id is provided
+    // TODO: Validate that id is provided
     // If not provided, return error with 400 status
-    if (empty($data['topic_id'])) {
+    if (empty($data['id'])) {
         sendResponse([
             'success' => false,
             'message' => 'Topic ID is required'
@@ -353,9 +353,9 @@ function updateTopic($db, $data) {
     // TODO: Check if topic exists
     // Prepare and execute a SELECT query
     // If not found, return error with 404 status
-    $checkSql = "SELECT COUNT(*) FROM topics WHERE topic_id = :topic_id";
+    $checkSql = "SELECT COUNT(*) FROM topics WHERE id = :id";
     $checkStmt = $db->prepare($checkSql);
-    $checkStmt->bindValue(':topic_id', $data['topic_id']);
+    $checkStmt->bindValue(':id', $data['id']);
     $checkStmt->execute();
     $count = $checkStmt->fetchColumn();
     if ($count == 0) {
@@ -367,7 +367,7 @@ function updateTopic($db, $data) {
     // TODO: Build UPDATE query dynamically based on provided fields
     // Only update fields that are provided in the request
     $updates = [];
-    $params = [':topic_id' => $data['topic_id']];
+    $params = [':id' => $data['id']];
     if (isset($data['subject']) && !empty(trim($data['subject']))) {
         $updates[] = "subject = :subject";
         $params[':subject'] = sanitizeInput($data['subject']);
@@ -389,7 +389,7 @@ function updateTopic($db, $data) {
     }
     
     // TODO: Complete the UPDATE query
-    $updateSql = "UPDATE topics SET " . implode(", ", $updates) . " WHERE topic_id = :topic_id";
+    $updateSql = "UPDATE topics SET " . implode(", ", $updates) . " WHERE id = :id";
     
     // TODO: Prepare statement and bind parameters
     // Bind all parameters from the $params array
@@ -446,9 +446,9 @@ function deleteTopic($db, $topicId) {
     // Prepare and execute a SELECT query
     // If not found, return error with 404 status
     
-    $checkSql = "SELECT COUNT(*) FROM topics WHERE topic_id = :topic_id";
+    $checkSql = "SELECT COUNT(*) FROM topics WHERE id = :id";
     $checkStmt = $db->prepare($checkSql);
-    $checkStmt->bindValue(':topic_id', $topicId);
+    $checkStmt->bindValue(':id', $topicId);
     $checkStmt->execute();
     $count = $checkStmt->fetchColumn();
     if ($count == 0) {
@@ -459,16 +459,16 @@ function deleteTopic($db, $topicId) {
     }
     // TODO: Delete associated replies first (foreign key constraint)
     // Prepare DELETE query for replies table
-    $deleteRepliesSql = "DELETE FROM replies WHERE topic_id = :topic_id";
+    $deleteRepliesSql = "DELETE FROM replies WHERE id = :id";
     $deleteRepliesStmt = $db->prepare($deleteRepliesSql);
     
     // TODO: Prepare DELETE query for the topic
-    $deleteTopicSql = "DELETE FROM topics WHERE topic_id = :topic_id";
+    $deleteTopicSql = "DELETE FROM topics WHERE id = :id";
     $deleteTopicStmt = $db->prepare($deleteTopicSql);
     // TODO: Prepare, bind, and execute
-    $deleteRepliesStmt->bindValue(':topic_id', $topicId);
+    $deleteRepliesStmt->bindValue(':id', $topicId);
     $deleteRepliesStmt->execute();
-    $deleteTopicStmt->bindValue(':topic_id', $topicId);
+    $deleteTopicStmt->bindValue(':id', $topicId);
     $deleteResult = $deleteTopicStmt->execute();
 
     // TODO: Check if delete was successful
@@ -497,7 +497,7 @@ function deleteTopic($db, $topicId) {
  * Method: GET
  * 
  * Query Parameters:
- *   - topic_id: The topic's unique identifier
+ *   - id: The topic's unique identifier
  */
 function getRepliesByTopicId($db, $topicId) {
     // TODO: Validate that topicId is provided
@@ -509,12 +509,12 @@ function getRepliesByTopicId($db, $topicId) {
         ], 400);
     }
     // TODO: Prepare SQL query to select all replies for the topic
-    // Select reply_id, topic_id, text, author, and created_at (formatted as date)
+    // Select reply_id, id, text, author, and created_at (formatted as date)
     // Order by created_at ASC (oldest first)
-    $sql = "SELECT reply_id, topic_id, text, author, DATE_FORMAT(created_at, '%Y-%m-%d %H:%i:%s') AS created_at FROM replies WHERE topic_id = :topic_id ORDER BY created_at ASC";    
-    // TODO: Prepare and bind the topic_id parameter
+    $sql = "SELECT reply_id, id, text, author, DATE_FORMAT(created_at, '%Y-%m-%d %H:%i:%s') AS created_at FROM replies WHERE id = :id ORDER BY created_at ASC";    
+    // TODO: Prepare and bind the id parameter
     $stmt = $db->prepare($sql);
-    $stmt->bindValue(':topic_id', $topicId);
+    $stmt->bindValue(':id', $topicId);
     // TODO: Execute the query
     $stmt->execute();
     // TODO: Fetch all results as an associative array
@@ -537,15 +537,15 @@ function getRepliesByTopicId($db, $topicId) {
  * 
  * Required JSON Body:
  *   - reply_id: Unique identifier (e.g., "reply_1234567890")
- *   - topic_id: The parent topic's identifier
+ *   - id: The parent topic's identifier
  *   - text: Reply message text
  *   - author: Author's name
  */
 function createReply($db, $data) {
     // TODO: Validate required fields
-    // Check if reply_id, topic_id, text, and author are provided
+    // Check if reply_id, id, text, and author are provided
     // If any field is missing, return error with 400 status
-    if (empty($data['reply_id']) || empty($data['topic_id']) || empty($data['text']) || empty($data['author'])) {
+    if (empty($data['reply_id']) || empty($data['id']) || empty($data['text']) || empty($data['author'])) {
         sendResponse([
             'success' => false,
             'message' => 'Missing required fields'
@@ -555,7 +555,7 @@ function createReply($db, $data) {
     // TODO: Sanitize input data
     // Trim whitespace from all fields
     $replyId = sanitizeInput($data['reply_id']);
-    $topicId = sanitizeInput($data['topic_id']);
+    $topicId = sanitizeInput($data['id']);
     $text = sanitizeInput($data['text']);
     $author = sanitizeInput($data['author']);
 
@@ -563,9 +563,9 @@ function createReply($db, $data) {
     // TODO: Verify that the parent topic exists
     // Prepare and execute SELECT query on topics table
     // If topic doesn't exist, return error with 404 status (can't reply to non-existent topic)
-    $checkSql = "SELECT COUNT(*) FROM topics WHERE topic_id = :topic_id";
+    $checkSql = "SELECT COUNT(*) FROM topics WHERE id = :id";
     $checkStmt = $db->prepare($checkSql);
-    $checkStmt->bindValue(':topic_id', $topicId);
+    $checkStmt->bindValue(':id', $topicId);
     $checkStmt->execute();
     $count = $checkStmt->fetchColumn();
     if ($count == 0) {
@@ -591,8 +591,8 @@ function createReply($db, $data) {
     }
 
     // TODO: Prepare INSERT query
-    // Insert reply_id, topic_id, text, and author
-    $insertSql = "INSERT INTO replies (reply_id, topic_id, text, author) VALUES (:reply_id, :topic_id, :text, :author)";
+    // Insert reply_id, id, text, and author
+    $insertSql = "INSERT INTO replies (reply_id, id, text, author) VALUES (:reply_id, :id, :text, :author)";
 
     
     // TODO: Prepare statement and bind parameters
@@ -601,7 +601,7 @@ function createReply($db, $data) {
     // TODO: Execute the query
     $insertResult=$insertStmt->execute([
         ':reply_id' => $replyId,
-        ':topic_id' => $topicId,
+        ':id' => $topicId,
         ':text' => $text,
         ':author' => $author
     ]);
@@ -710,7 +710,7 @@ break;
 
 case 'replies':
 if ($method === 'GET') {
-getRepliesByTopicId($db, $_GET['topic_id'] ?? null);
+getRepliesByTopicId($db, $_GET['id'] ?? null);
 } elseif ($method === 'POST') {
 createReply($db, $data);
 } elseif ($method === 'DELETE') {

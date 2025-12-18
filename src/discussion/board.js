@@ -14,6 +14,8 @@
 // --- Global Data Store ---
 // This will hold the topics loaded from the JSON file.
 let topics = [];
+const API_URL = '/api/discussion.php';
+
 
 // --- Element Selections ---
 // TODO: Select the new topic form ('#new-topic-form').
@@ -84,22 +86,39 @@ topics.forEach(topic => {
  * 5. Call `renderTopics()` to refresh the list.
  * 6. Reset the form.
  */
-function handleCreateTopic(event) {
-event.preventDefault();
-const subjectInput = newTopicForm.querySelector('#topic-subject');
-const messageInput = newTopicForm.querySelector('#topic-message');
-const newTopic = {
-   id: `topic_${Date.now()}`,
-    subject: subjectInput.value,
-    message: messageInput.value,
-    author: 'Student',
-    date: new Date().toISOString().split('T')[0]
-  };
-topics.push(newTopic);
-renderTopics();
-newTopicForm.reset();
+async function handleCreateTopic(event) {
+  event.preventDefault();
 
+  const subject = newTopicForm.querySelector('#topic-subject').value.trim();
+  const message = newTopicForm.querySelector('#topic-message').value.trim();
+
+  if (!subject || !message) return;
+
+  const newTopic = {
+    id: `topic_${Date.now()}`,
+    subject,
+    message,
+    author: 'Student'
+  };
+
+  const response = await fetch(`${API_URL}?resource=topics`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(newTopic)
+  });
+
+  const result = await response.json();
+  if (!result.success) return alert(result.message);
+
+  topics.unshift({
+    ...newTopic,
+    date: new Date().toISOString().split('T')[0]
+  });
+
+  renderTopics();
+  newTopicForm.reset();
 }
+
 
 /**
  * TODO: Implement the handleTopicListClick function.
@@ -111,13 +130,23 @@ newTopicForm.reset();
  * with the matching ID (in-memory only).
  * 4. Call `renderTopics()` to refresh the list.
  */
-function handleTopicListClick(event) {
-if (event.target.classList.contains('delete-btn')) {
-    const topicId = event.target.getAttribute('data-id');
-    topics = topics.filter(topic => topic.id !== topicId);
-    renderTopics();
-  }
- }
+async function handleTopicListClick(event) {
+  if (!event.target.classList.contains('delete-btn')) return;
+
+  const topicId = event.target.dataset.id;
+
+  const response = await fetch(
+    `${API_URL}?resource=topics&id=${topicId}`,
+    { method: 'DELETE' }
+  );
+
+  const result = await response.json();
+  if (!result.success) return alert(result.message);
+
+  topics = topics.filter(t => t.id !== topicId);
+  renderTopics();
+}
+
 
 /**
  * TODO: Implement the loadAndInitialize function.
@@ -131,15 +160,21 @@ if (event.target.classList.contains('delete-btn')) {
  */
 async function loadAndInitialize() {
   try {
-    const response = await fetch('topics.json');
-    topics = await response.json();
+    const response = await fetch(`${API_URL}?resource=topics`);
+    const result = await response.json();
+
+    if (!result.success) throw new Error(result.message);
+
+    topics = result.data;
     renderTopics();
+
     newTopicForm.addEventListener('submit', handleCreateTopic);
     topicListContainer.addEventListener('click', handleTopicListClick);
-  }catch (error) {
-    console.error('Error loading topics:', error);
+  } catch (error) {
+    console.error(error);
   }
 }
+
 
 // --- Initial Page Load ---
 // Call the main async function to start the application.
