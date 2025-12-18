@@ -286,4 +286,3 @@ async function loadAndInitialize() {
 // --- Initial Page Load ---
 // Call the main async function to start the application.
 loadAndInitialize();
-
