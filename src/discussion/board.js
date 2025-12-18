@@ -14,7 +14,8 @@
 // --- Global Data Store ---
 // This will hold the topics loaded from the JSON file.
 let topics = [];
-const API_URL = '/api/discussion.php';
+const API_URL = '/src/discussion/api/index.php'; 
+// or wherever discussion.php actually lives
 
 
 // --- Element Selections ---
@@ -130,23 +131,13 @@ async function handleCreateTopic(event) {
  * with the matching ID (in-memory only).
  * 4. Call `renderTopics()` to refresh the list.
  */
-async function handleTopicListClick(event) {
-  if (!event.target.classList.contains('delete-btn')) return;
-
-  const topicId = event.target.dataset.id;
-
-  const response = await fetch(
-    `${API_URL}?resource=topics&id=${topicId}`,
-    { method: 'DELETE' }
-  );
-
-  const result = await response.json();
-  if (!result.success) return alert(result.message);
-
-  topics = topics.filter(t => t.id !== topicId);
-  renderTopics();
-}
-
+function handleTopicListClick(event) {
+if (event.target.classList.contains('delete-btn')) {
+    const topicId = event.target.getAttribute('data-id');
+    topics = topics.filter(topic => topic.id !== topicId);
+    renderTopics();
+  }
+ }
 
 /**
  * TODO: Implement the loadAndInitialize function.
@@ -160,7 +151,7 @@ async function handleTopicListClick(event) {
  */
 async function loadAndInitialize() {
   try {
-    const response = await fetch(`${API_URL}?resource=topics`);
+    const response = await fetch(`/src/resources/api/index.php?resource=topics`);
     const result = await response.json();
 
     if (!result.success) throw new Error(result.message);

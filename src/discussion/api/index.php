@@ -116,8 +116,9 @@ if($method === 'POST' || $method === 'PUT') {
 
 // TODO: Parse query parameters for filtering and searching
 $resource = isset($_GET['resource']) ? $_GET['resource'] : null;
-$topicId = isset($_GET['id']) ? $_GET['id'] : null;
-$replyId = isset($_GET['id']) ? $_GET['id'] : null;
+$topicId = $_GET['id'] ?? null;
+$replyId = $_GET['id'] ?? null;
+
 
 
 
@@ -687,46 +688,41 @@ function deleteReply($db, $replyId) {
 // ============================================================================
 
 try {
-if (!isValidResource($resource)) {
-sendResponse(['success' => false, 'message' => 'Invalid resource'], 400);
-}
+  if (!isValidResource($resource)) {
+    sendResponse(['success' => false, 'message' => 'Invalid resource'], 400);
+  }
 
+  switch ($resource) {
 
-switch ($resource) {
-case 'topics':
-if ($method === 'GET') {
-$topicId ? getTopicById($db, $topicId) : getAllTopics($db);
-} elseif ($method === 'POST') {
-createTopic($db, $data);
-} elseif ($method === 'PUT') {
-updateTopic($db, $data);
-} elseif ($method === 'DELETE') {
-deleteTopic($db, $topicId);
-} else {
-sendResponse(['success' => false, 'message' => 'Method not allowed'], 405);
-}
-break;
+    case 'topics':
+      if ($method === 'GET') {
+        $topicId ? getTopicById($db, $topicId) : getAllTopics($db);
+      } elseif ($method === 'POST') {
+        createTopic($db, $data);
+      } elseif ($method === 'DELETE') {
+        deleteTopic($db, $topicId);
+      } else {
+        sendResponse(['success' => false, 'message' => 'Method not allowed'], 405);
+      }
+      break;
 
+    case 'replies':
+      if ($method === 'GET') {
+        getRepliesByTopicId($db, $topicId);
+      } elseif ($method === 'POST') {
+        createReply($db, $data);
+      } elseif ($method === 'DELETE') {
+        deleteReply($db, $replyId);
+      } else {
+        sendResponse(['success' => false, 'message' => 'Method not allowed'], 405);
+      }
+      break;
+  }
 
-case 'replies':
-if ($method === 'GET') {
-getRepliesByTopicId($db, $_GET['id'] ?? null);
-} elseif ($method === 'POST') {
-createReply($db, $data);
-} elseif ($method === 'DELETE') {
-deleteReply($db, $replyId);
-} else {
-sendResponse(['success' => false, 'message' => 'Method not allowed'], 405);
-}
-break;
-}
-
-
-} catch (PDOException $e) {
-sendResponse(['success' => false, 'message' => 'Database error'], 500);
 } catch (Exception $e) {
-sendResponse(['success' => false, 'message' => 'Server error'], 500);
+  sendResponse(['success' => false, 'message' => 'Server error'], 500);
 }
+
 
 // ============================================================================
 // HELPER FUNCTIONS
